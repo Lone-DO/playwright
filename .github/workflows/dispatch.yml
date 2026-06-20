@@ -63,15 +63,16 @@ jobs:
         if: steps.pnpm_cache.outputs.cache-hit != 'true'
         run: |
           pnpm install
+          echo "Saving pnpm cache... ${{ steps.pnpm_cache.outputs.cache-primary-key || 'no-key' }}"
 
       - name: Save pnpm cache (if changed)
         uses: actions/cache@v5
         if: steps.pnpm_cache.outputs.cache-hit != 'true'
         with:
-          run: echo "Saving pnpm cache... ${{ steps.pnpm_cache.outputs.cache-primary-key || 'no-key' }}"
           path: |
             node_modules
           key: ${{ steps.pnpm_cache.outputs.cache-primary-key }}
+        continue-on-error: true
 
       # Setup Playwright and dependencies in the root repository
       # TODO: Cache Playwright browsers to speed up test runs
