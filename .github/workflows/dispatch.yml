@@ -52,7 +52,7 @@ jobs:
       # Attempt to restore pnpm cache to speed up dependency installation
       - name: Restore pnpm cache (if any)
         id: pnpm_cache
-        uses: cache/restore@v4
+        uses: actions/cache@v5
         with:
           path: |
             node_modules
@@ -65,7 +65,7 @@ jobs:
           pnpm install
 
       - name: Save pnpm cache (if changed)
-        uses: cache/save@v4
+        uses: actions/cache@v5
         if: steps.pnpm_cache.outputs.cache-hit != 'true'
         with:
           path: |
