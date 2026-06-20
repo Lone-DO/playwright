@@ -1,0 +1,78 @@
+name: Remote Dispatch Playwright Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      app-name:
+        type: choice
+        required: true
+        description: Which app to run tests for
+        options:
+        - macos
+      sha:
+        type: string
+        description: The commit SHA to run tests for
+        required: true
+      environment:
+        type: choice
+        required: true
+        description: The environment to run tests in
+        options:
+          - dev
+          - macos-dev
+          - prod
+          - macos-prod
+
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Send Init Message
+      if: ${{ github.event.inputs.app-name == 'macos' }}
+      run: echo "Hello, macOS! Running tests for commit ${{ github.event.inputs.sha }} in environment ${{ github.event.inputs.environment }}."
+
+  setup: 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Root Repository
+        uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Install dependencies
+        run: pnpm install
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+  checkout: 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          repository: ${{github.event.repository.full_name}}
+          ref: ${{ github.event.inputs.sha }}
+          path: app
+      - name: Navigate to app directory
+        run: cd app
+      - name: Install Dependencies
+        run: pnpm install
+      - name: Start Web Server
+        run: pnpm start
+      
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+    - name: Run Playwright tests
+      run:  TEST_ENV=${{ github.event.inputs.environment }} npx playwright test
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
