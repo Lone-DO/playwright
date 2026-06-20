@@ -28,7 +28,7 @@ const config: PlaywrightTestConfig = defineConfig({
 if (macConfig.isTargetedModule) {
   config.testDir = `./tests/${environment.split('-')[1]}`;
   config.projects?.push(...macConfig.projects);
-  if (environment === 'macos-dev') { 
+  if (environment === 'mac-dev') { 
     config.webServer = {
       command: 'cd app && npm run dev -- --port 3000',
       url: 'http://localhost:3000',

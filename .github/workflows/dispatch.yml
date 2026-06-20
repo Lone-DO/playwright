@@ -8,7 +8,7 @@ on:
         required: true
         description: Which app to run tests for
         options:
-        - macos
+        - mac
       sha:
         type: string
         description: The commit SHA to run tests for
@@ -19,9 +19,9 @@ on:
         description: The environment to run tests in
         options:
           - dev
-          - macos-dev
+          - mac-dev
           - prod
-          - macos-prod
+          - mac-prod
 
 jobs:
   greet:
