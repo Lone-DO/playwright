@@ -7,8 +7,8 @@ const name = isTargetedModule ? environment : environment === 'local' ? 'mac-loc
 const testDir = path.resolve(__dirname, '../mac');
 const outputDirBase = `test-results`;
 const baseURL: BaseURL = {
-  dev: 'http://localhost:5173',
-  local: 'http://localhost:5173',
+  dev: 'http://localhost:3000',
+  local: 'http://localhost:3001',
   prod: 'https://lone-do.github.io',
 }
 

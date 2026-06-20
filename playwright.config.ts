@@ -22,12 +22,20 @@ const config: PlaywrightTestConfig = defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
   },
-  projects: []
+  projects: [], 
 });
 
 if (macConfig.isTargetedModule) {
   config.testDir = `./tests/${environment.split('-')[1]}`;
   config.projects?.push(...macConfig.projects);
+  if (environment === 'macos-dev') { 
+    config.webServer = {
+      command: 'cd app && npm run dev -- --port 3000',
+      url: 'http://localhost:3000',
+      stdout: 'ignore',
+      stderr: 'ignore',
+    };
+  }
 } else {
   config.projects = [
     ...baseConfig.projects,

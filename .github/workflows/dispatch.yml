@@ -32,7 +32,8 @@ jobs:
       if: ${{ github.event.inputs.app-name == 'macos' }}
       run: echo "Hello, macOS! Running tests for commit ${{ github.event.inputs.sha }} in environment ${{ github.event.inputs.environment }}."
 
-  setup: 
+  test:
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Root Repository
@@ -44,14 +45,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+
+      # Setup Playwright and dependencies in the root repository
       - name: Install dependencies
         run: pnpm install
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-  checkout: 
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
+      
+      # Checkout the code of the target repository and run tests
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -62,20 +63,14 @@ jobs:
         run: cd app
       - name: Install Dependencies
         run: pnpm install
-      - name: Start Web Server
-        run: pnpm start
-      - name: Wait for Web Server
-        run: npx wait-on http://localhost:5173
-  test:
-    needs: checkout
-    timeout-minutes: 60
-    runs-on: ubuntu-latest
-    steps:
-    - name: Run Playwright tests
-      run:  TEST_ENV=${{ github.event.inputs.environment }} npx playwright test
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+      # Initialize Test Environment Variables and Run Playwright tests
+      - name: Navigate to root directory
+        run: cd ..
+      - name: Run Playwright tests
+        run:  TEST_ENV=${{ github.event.inputs.environment }} npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
