@@ -1,10 +1,8 @@
 import path from 'path';
 import type { BaseURL, ProjectConfig } from '@/lib/types';
-import { baseProjects, environment } from '@/lib/constants';
+import { baseProjects, environment, macEnvironments } from '@/lib/constants';
 
-
-const environments = ['mac-dev', 'mac-local', 'mac-prod'];
-const isTargetedModule = environments.includes(environment);
+const isTargetedModule = macEnvironments.includes(environment);
 const name = isTargetedModule ? environment : environment === 'local' ? 'mac-local' : 'mac-prod';
 const testDir = path.resolve(__dirname, '../mac');
 const outputDirBase = `test-results`;
@@ -24,46 +22,8 @@ const projects = baseProjects.map(project => ({
   }, 
 }));
 
-// const macLocalConfig: PlaywrightTestConfig = {
-//   ...baseConfig,
-//   testDir,
-//   projects,
-//   use: {
-//     ...baseConfig.use,
-//     baseURL: baseURL.local,
-//   },
-// }
-
-// const macDevConfig: PlaywrightTestConfig = {
-//   ...baseConfig,
-//   testDir,
-//   outputDir: `${outputDirBase}/mac-dev`,
-//   projects: baseProjects,
-//   /* Run your local dev server before starting the tests */
-//   webServer: {
-//     command: 'pnpm run dev',
-//     url: baseURL.dev,
-//     reuseExistingServer: !process.env.CI,
-//   },
-// }
-
-// const macProdConfig: TestConfig = {
-//   testDir,
-//   outputDir: `${outputDirBase}/mac-prod`,
-//   projects: baseProjects,
-//   use: {
-//     ...baseConfig.use,
-//     baseURL: baseURL.prod,
-//   },
-// }
-
-// const config: PlaywrightTestConfig = {
-//   ...baseConfig,
-//   ...(environment === 'mac-dev' ? macDevConfig : environment === 'mac-local' ? macLocalConfig : environment === 'mac-prod' ? macProdConfig : {}),
-// };
-
 const config: ProjectConfig = {
-  environments,
+  environments: macEnvironments,
   name,
   testDir,
   baseURL,
