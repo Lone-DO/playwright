@@ -45,10 +45,31 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+      # Attempt to restore pnpm cache to speed up dependency installation
+      - name: Restore pnpm cache (if any)
+        id: pnpm_cache
+        uses: cache/restore@v4
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        shell: bash
+        if: steps.pnpm_cache.outputs.cache-hit != 'true'
+        run: |
+          pnpm install
+
+      - name: Save pnpm cache (if changed)
+        uses: cache/save@v4
+        if: steps.pnpm_cache.outputs.cache-hit != 'true'
+        with:
+          path: |
+            node_modules
+          key: ${{ steps.pnpm_cache.outputs.cache-primary-key }}
 
       # Setup Playwright and dependencies in the root repository
-      - name: Install dependencies
-        run: pnpm install
+      # TODO: Cache Playwright browsers to speed up test runs
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       
@@ -59,13 +80,12 @@ jobs:
           repository: ${{github.event.repository.full_name}}
           ref: ${{ github.event.inputs.sha }}
           path: app
-      - name: Navigate to app directory
-        run: cd app
-      - name: Install Dependencies
+      - name: List app directory
+        run: ls app
+      - name: Install Repository Dependencies
+        working-directory: ./app
         run: pnpm install
       # Initialize Test Environment Variables and Run Playwright tests
-      - name: Navigate to root directory
-        run: cd ..
       - name: Run Playwright tests
         run:  TEST_ENV=${{ github.event.inputs.environment }} npx playwright test
       - uses: actions/upload-artifact@v4
