@@ -9,19 +9,23 @@ on:
         description: Which app to run tests for
         options:
         - mac
+      repository:
+        type: string
+        required: true
+        description: The repository to run tests for (e.g., user/repo)
       sha:
         type: string
+        default: main
         description: The commit SHA to run tests for
-        required: true
       environment:
         type: choice
-        required: true
         description: The environment to run tests in
         options:
           - dev
           - mac-dev
           - prod
           - mac-prod
+        default: prod
 
 jobs:
   greet:
@@ -77,7 +81,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          repository: ${{github.event.repository.full_name}}
+          repository: ${{ github.event.inputs.repository }}
           ref: ${{ github.event.inputs.sha }}
           path: app
       - name: List app directory
