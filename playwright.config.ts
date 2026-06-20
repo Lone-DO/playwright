@@ -30,10 +30,10 @@ if (macConfig.isTargetedModule) {
   config.projects?.push(...macConfig.projects);
   if (environment === 'mac-dev') { 
     config.webServer = {
-      command: 'cd app && npm run dev -- --port 3000',
+      command: 'npm run --prefix app dev -- --port 3000',
       url: 'http://localhost:3000',
-      stdout: 'ignore',
-      stderr: 'ignore',
+      // stdout: 'ignore',
+      // stderr: 'ignore',
     };
   }
 } else {
