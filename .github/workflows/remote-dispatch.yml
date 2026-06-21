@@ -1,44 +1,27 @@
 name: Remote Dispatch Playwright Tests
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
-      app-name:
-        type: choice
-        required: true
-        description: Which app to run tests for
-        options:
-        - mac
       repository:
         type: string
         required: true
-        description: The repository to run tests for (e.g., user/repo)
+        description: The repository to checkout (e.g., user/repo)
       sha:
         type: string
         default: main
-        description: The commit SHA to run tests for
+        description: The commit SHA to checkout (e.g., main, a specific branch, or a commit hash)
       environment:
-        type: choice
-        description: The environment to run tests in
-        options:
-          - dev
-          - mac-dev
-          - prod
-          - mac-prod
-        default: prod
+        type: string
+        required: true
+        description: The environment to run tests in (e.g., prod | *-prod | mac-dev | *-dev)
 
 jobs:
-  greet:
+  Dispatch-Playwright-Tests:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
-
-    steps:
-    - name: Send Init Message
-      if: ${{ github.event.inputs.app-name == 'macos' }}
-      run: echo "Hello, macOS! Running tests for commit ${{ github.event.inputs.sha }} in environment ${{ github.event.inputs.environment }}."
-
-  test:
-    timeout-minutes: 60
-    runs-on: ubuntu-latest
+    env:
+      TEST_ENV: ${{ github.event.inputs.environment }}
     steps:
       - name: Checkout Root Repository
         uses: actions/checkout@v4
@@ -93,7 +76,7 @@ jobs:
         run: pnpm install
       # Initialize Test Environment Variables and Run Playwright tests
       - name: Run Playwright tests
-        run:  TEST_ENV=${{ github.event.inputs.environment }} npx playwright test
+        run:  npx playwright test
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
