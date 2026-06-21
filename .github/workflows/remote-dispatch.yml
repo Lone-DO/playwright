@@ -21,14 +21,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Send Log
-      run: echo "Running tests for commit ${{ github.event.inputs.sha }} in environment ${{ github.event.inputs.environment }} from ${{ github.event.inputs.repository }}."
+      run: echo "Running tests for commit ${{ inputs.sha }} in environment ${{ inputs.environment }} from ${{ inputs.repository }}."
     - name: Send Log of Root Repository
       run: echo "Running tests from ${{ github.repository }} commit ${{ github.sha }}, with job hosted on ${{ runner.os }}, ${{ job.workflow_repository }} commit ${{ job.workflow_sha }}."
   Dispatch-Playwright-Tests:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     env:
-      TEST_ENV: ${{ github.event.inputs.environment }}
+      TEST_ENV: ${{ inputs.environment }}
     steps:
       - name: Checkout Root Repository
         uses: actions/checkout@v4
@@ -72,17 +72,17 @@ jobs:
         run: npx playwright install --with-deps
       # Checkout the code of the target repository and run tests
       - name: Checkout code
-        if: ${{ github.event.inputs.environment != 'prod' }}
+        if: ${{ inputs.environment != 'prod' }}
         uses: actions/checkout@v5
         with:
-          repository: ${{ github.event.inputs.repository || github.repository }}
-          ref: ${{ github.event.inputs.sha || github.sha }}
+          repository: ${{ inputs.repository || github.repository }}
+          ref: ${{ inputs.sha || github.sha }}
           path: app
       - name: List app directory
-        if: ${{ github.event.inputs.environment != 'prod' }}
+        if: ${{ inputs.environment != 'prod' }}
         run: ls app
       - name: Install Repository Dependencies
-        if: ${{ github.event.inputs.environment != 'prod' }}
+        if: ${{ inputs.environment != 'prod' }}
         working-directory: ./app
         run: pnpm install
       # Initialize Test Environment Variables and Run Playwright tests
