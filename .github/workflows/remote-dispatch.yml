@@ -23,7 +23,7 @@ jobs:
     - name: Send Log
       run: echo "Running tests for commit ${{ github.event.inputs.sha }} in environment ${{ github.event.inputs.environment }} from ${{ github.event.inputs.repository }}."
     - name: Send Log of Root Repository
-      run: echo "Running tests from ${{ github.repository }} commit ${{ github.sha }}."
+      run: echo "Running tests from ${{ github.repository }} commit ${{ github.sha }}, with job hosted on ${{ runner.os }}, ${{ job.workflow_repository }} commit ${{ job.workflow_sha }}."
   Dispatch-Playwright-Tests:
     timeout-minutes: 30
     runs-on: ubuntu-latest
