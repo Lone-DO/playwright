@@ -17,6 +17,13 @@ on:
         description: The environment to run tests in (e.g., prod | *-prod | mac-dev | *-dev)
 
 jobs:
+  Log-Init-Message:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Send Log
+      run: echo "Running tests for commit ${{ github.event.inputs.sha }} in environment ${{ github.event.inputs.environment }} from ${{ github.event.inputs.repository }}."
+    - name: Send Log of Root Repository
+      run: echo "Running tests from ${{ github.repository }} commit ${{ github.sha }}."
   Dispatch-Playwright-Tests:
     timeout-minutes: 30
     runs-on: ubuntu-latest
@@ -25,6 +32,9 @@ jobs:
     steps:
       - name: Checkout Root Repository
         uses: actions/checkout@v4
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -56,27 +66,28 @@ jobs:
             node_modules
           key: ${{ steps.pnpm_cache.outputs.cache-primary-key }}
         continue-on-error: true
-
       # Setup Playwright and dependencies in the root repository
       # TODO: Cache Playwright browsers to speed up test runs
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-      
       # Checkout the code of the target repository and run tests
       - name: Checkout code
-        uses: actions/checkout@v4
+        if: ${{ github.event.inputs.environment != 'prod' }}
+        uses: actions/checkout@v5
         with:
-          repository: ${{ github.event.inputs.repository }}
-          ref: ${{ github.event.inputs.sha }}
+          repository: ${{ github.event.inputs.repository || github.repository }}
+          ref: ${{ github.event.inputs.sha || github.sha }}
           path: app
       - name: List app directory
+        if: ${{ github.event.inputs.environment != 'prod' }}
         run: ls app
       - name: Install Repository Dependencies
+        if: ${{ github.event.inputs.environment != 'prod' }}
         working-directory: ./app
         run: pnpm install
       # Initialize Test Environment Variables and Run Playwright tests
       - name: Run Playwright tests
-        run:  npx playwright test
+        run: npx playwright test
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
